@@ -15,7 +15,8 @@ class MonitoringActionProcessor @Inject constructor() {
                 Observable.merge(
                     shared.ofType(MonitoringAction.StartMonitoringAction::class.java).compose(startMonitoringProcessor),
                     shared.ofType(MonitoringAction.InitializeMonitoringAction::class.java).compose(initializeMonitoringProcessor),
-                    shared.ofType(MonitoringAction.StopMonitoringAction::class.java).compose(stopMonitoringProcessor)
+                    shared.ofType(MonitoringAction.StopMonitoringAction::class.java).compose(stopMonitoringProcessor),
+                    shared.ofType(MonitoringAction.AlertMonitoringAction::class.java).compose(alertMonitoringProcessor)
                 )
             }
         }
@@ -40,4 +41,13 @@ class MonitoringActionProcessor @Inject constructor() {
                 Observable.just(MonitoringResult.MonitoringStarted)
             }
         }
+
+    private val alertMonitoringProcessor: ObservableTransformer<MonitoringAction.AlertMonitoringAction, MonitoringResult.MonitoringAlert> =
+        ObservableTransformer { actions ->
+            actions.map { action ->
+                val message = action.message
+                MonitoringResult.MonitoringAlert(message)
+            }
+        }
+
 }

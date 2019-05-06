@@ -8,19 +8,25 @@ import com.fm.mvi.model.MonitoringAction
 import com.fm.mvi.model.MonitoringIntents
 import com.fm.mvi.model.MonitoringResult
 import com.fm.mvi.model.MonitoringViewState
+import com.fm.mvi.service.AlertMessage
+import com.fm.mvi.service.AlertService
 import io.reactivex.Observable
-import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
+import io.reactivex.functions.Consumer
 import io.reactivex.subjects.PublishSubject
 import javax.inject.Singleton
 
 
 @Singleton
-class MonitoringViewModel(private val monitoringActionProcessor: MonitoringActionProcessor) : ViewModel(),
+class MonitoringViewModel(
+    private val monitoringActionProcessor: MonitoringActionProcessor,
+    private val alertService: AlertService
+) : ViewModel(),
     MviViewModel<MonitoringIntents, MonitoringViewState> {
 
     private val intentsSubject: PublishSubject<MonitoringIntents> = PublishSubject.create()
     private val mStatesObservable: Observable<MonitoringViewState> = compose()
+    private val mAlertsObservable: Observable<AlertMessage> = alertService.stackOfAlert
 
     override fun processIntents(intents: Observable<MonitoringIntents>) {
         intents.subscribe(intentsSubject)
@@ -28,27 +34,24 @@ class MonitoringViewModel(private val monitoringActionProcessor: MonitoringActio
 
     override fun states(): Observable<MonitoringViewState> = mStatesObservable
 
-    /**
-     * take only the first ever InitialIntent and all intents of other types
-     * to avoid reloading data on config changes
-     */
-    private val intentFilter: ObservableTransformer<MonitoringIntents, MonitoringIntents>
-        get() = ObservableTransformer { intents ->
-            intents.publish { shared ->
-                Observable.merge(
-                    shared.ofType(MonitoringIntents.StopMonitoringIntent::class.java).take(1),
-                    shared.filter { intent -> intent !is MonitoringIntents.StopMonitoringIntent }
-                )
+    fun registerAlertService() {
+        mAlertsObservable
+            .map { alertMessage: AlertMessage ->
+                when (alertMessage) {
+                    is AlertMessage.Alert -> intentsSubject.onNext(MonitoringIntents.AlertMonitoringIntent(alertMessage.description))
+                }
             }
-        }
+            .subscribe()
+    }
 
     /**
      * Translate an [MviIntent] to an [MviAction].
      */
     private fun actionFromIntent(intent: MonitoringIntents): MonitoringAction = when (intent) {
-        MonitoringIntents.StartMonitoringIntent -> MonitoringAction.InitializeMonitoringAction
-        MonitoringIntents.StopMonitoringIntent -> MonitoringAction.StopMonitoringAction
-        MonitoringIntents.InitializeMonitoringIntent -> MonitoringAction.StartMonitoringAction
+        is MonitoringIntents.StartMonitoringIntent -> MonitoringAction.InitializeMonitoringAction
+        is MonitoringIntents.StopMonitoringIntent -> MonitoringAction.StopMonitoringAction
+        is MonitoringIntents.InitializeMonitoringIntent -> MonitoringAction.StartMonitoringAction
+        is MonitoringIntents.AlertMonitoringIntent -> MonitoringAction.AlertMonitoringAction(intent.message)
     }
 
     private fun compose(): Observable<MonitoringViewState> {
@@ -65,9 +68,10 @@ class MonitoringViewModel(private val monitoringActionProcessor: MonitoringActio
         private val reducer =
             BiFunction { previousState: MonitoringViewState, result: MonitoringResult ->
                 when (result) {
-                    MonitoringResult.MonitoringStopped -> MonitoringViewState.Stopped
-                    MonitoringResult.MonitoringInitializing -> MonitoringViewState.Initialization
-                    MonitoringResult.MonitoringStarted -> MonitoringViewState.Started
+                    is MonitoringResult.MonitoringStopped -> MonitoringViewState.Stopped
+                    is MonitoringResult.MonitoringInitializing -> MonitoringViewState.Initialization
+                    is MonitoringResult.MonitoringStarted -> MonitoringViewState.Started
+                    is MonitoringResult.MonitoringAlert -> MonitoringViewState.Alert(result.message)
                 }
             }
     }

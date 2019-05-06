@@ -14,6 +14,8 @@ sealed class MonitoringViewState : MviViewState {
 
     object Initialization: MonitoringViewState()
 
+    data class Alert(val alertMessage: String): MonitoringViewState()
+
     companion object {
         fun idle(): MonitoringViewState = Stopped
     }
