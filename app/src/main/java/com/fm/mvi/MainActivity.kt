@@ -11,9 +11,15 @@ import com.fm.mvi.presentation.MonitoringViewModelFactory
 import com.jakewharton.rxbinding2.view.RxView
 import dagger.android.AndroidInjection
 import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.functions.BiFunction
+import io.reactivex.functions.Consumer
 import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringViewState> {
@@ -21,6 +27,7 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
     @Inject
     lateinit var factory: MonitoringViewModelFactory
     private val disposables = CompositeDisposable()
+    private val initializeIntent = PublishSubject.create<MonitoringIntents.InitializeMonitoringIntent>()
 
     private val viewModel: MonitoringViewModel by lazy {
         ViewModelProviders.of(this, factory).get(MonitoringViewModel::class.java)
@@ -45,11 +52,19 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
     }
 
     override fun intents(): Observable<MonitoringIntents> {
-        return Observable.merge(stopEvent(), startEvent())
+        return Observable.merge(stopEvent(), startEvent(), initializeIntent)
     }
 
     private fun stopEvent(): Observable<MonitoringIntents.StopMonitoringIntent> {
         return RxView.clicks(stop_button).map { MonitoringIntents.StopMonitoringIntent }
+    }
+
+    private fun initializationEvent() {
+        Observable.timer(3, TimeUnit.SECONDS)
+            .map { t -> initializeIntent.onNext(MonitoringIntents.InitializeMonitoringIntent) }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe()
     }
 
     private fun startEvent(): Observable<MonitoringIntents.StartMonitoringIntent> {
@@ -57,16 +72,21 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
     }
 
     override fun render(state: MonitoringViewState) = when (state) {
-        MonitoringViewState.Started -> renderStartedState()
         MonitoringViewState.Stopped -> renderStoppedState()
-    }
-
-    private fun renderStartedState() {
-        indicator.setImageResource(R.drawable.green_light_indicator)
+        MonitoringViewState.Initialization -> renderInitializationState()
+        MonitoringViewState.Started -> renderStartedState()
     }
 
     private fun renderStoppedState() {
         indicator.setImageResource(R.drawable.red_light_indicator)
     }
 
+    private fun renderInitializationState() {
+        indicator.setImageResource(R.drawable.orange_light_indicator)
+        initializationEvent()
+    }
+
+    private fun renderStartedState() {
+        indicator.setImageResource(R.drawable.green_light_indicator)
+    }
 }
