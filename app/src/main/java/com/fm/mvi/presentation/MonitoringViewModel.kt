@@ -46,8 +46,9 @@ class MonitoringViewModel(private val monitoringActionProcessor: MonitoringActio
      * Translate an [MviIntent] to an [MviAction].
      */
     private fun actionFromIntent(intent: MonitoringIntents): MonitoringAction = when (intent) {
-        MonitoringIntents.StartMonitoringIntent -> MonitoringAction.StartMonitoringAction
+        MonitoringIntents.StartMonitoringIntent -> MonitoringAction.InitializeMonitoringAction
         MonitoringIntents.StopMonitoringIntent -> MonitoringAction.StopMonitoringAction
+        MonitoringIntents.InitializeMonitoringIntent -> MonitoringAction.StartMonitoringAction
     }
 
     private fun compose(): Observable<MonitoringViewState> {
@@ -64,8 +65,9 @@ class MonitoringViewModel(private val monitoringActionProcessor: MonitoringActio
         private val reducer =
             BiFunction { previousState: MonitoringViewState, result: MonitoringResult ->
                 when (result) {
-                    MonitoringResult.MonitoringStarted -> MonitoringViewState.Started
                     MonitoringResult.MonitoringStopped -> MonitoringViewState.Stopped
+                    MonitoringResult.MonitoringInitializing -> MonitoringViewState.Initialization
+                    MonitoringResult.MonitoringStarted -> MonitoringViewState.Started
                 }
             }
     }

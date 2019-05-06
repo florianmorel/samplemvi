@@ -12,6 +12,8 @@ sealed class MonitoringViewState : MviViewState {
         fun stopMonitoring() = Stopped
     }
 
+    object Initialization: MonitoringViewState()
+
     companion object {
         fun idle(): MonitoringViewState = Stopped
     }
