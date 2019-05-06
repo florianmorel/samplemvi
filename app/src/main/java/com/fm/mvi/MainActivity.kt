@@ -3,6 +3,7 @@ package com.fm.mvi
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.view.View
 import com.fm.mvi.base.MviView
 import com.fm.mvi.model.MonitoringIntents
 import com.fm.mvi.model.MonitoringViewState
@@ -13,8 +14,6 @@ import dagger.android.AndroidInjection
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.functions.BiFunction
-import io.reactivex.functions.Consumer
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
@@ -38,7 +37,7 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
         AndroidInjection.inject(this)
         setContentView(R.layout.activity_main)
         initViews()
-        disposables += viewModel.states().subscribe(this::render)
+        disposables += viewModel.states().observeOn(AndroidSchedulers.mainThread()).subscribe(this::render)
         viewModel.processIntents(intents())
     }
 
@@ -79,14 +78,29 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
 
     private fun renderStoppedState() {
         indicator.setImageResource(R.drawable.red_light_indicator)
+        disableView(stop_button)
+        enableView(start_button)
     }
 
     private fun renderInitializationState() {
         indicator.setImageResource(R.drawable.orange_light_indicator)
         initializationEvent()
+        disableView(stop_button)
+        disableView(start_button)
     }
 
     private fun renderStartedState() {
         indicator.setImageResource(R.drawable.green_light_indicator)
+        disableView(start_button)
+        enableView(stop_button)
     }
+
+    private fun disableView(v: View) {
+        v.visibility = View.INVISIBLE
+    }
+
+    private fun enableView(v: View) {
+        v.visibility = View.VISIBLE
+    }
+
 }
