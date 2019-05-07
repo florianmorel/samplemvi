@@ -14,9 +14,17 @@ class MonitoringActionProcessor @Inject constructor() {
             action.publish { shared ->
                 Observable.merge(
                     shared.ofType(MonitoringAction.StartMonitoringAction::class.java).compose(startMonitoringProcessor),
-                    shared.ofType(MonitoringAction.InitializeMonitoringAction::class.java).compose(initializeMonitoringProcessor),
+                    shared.ofType(MonitoringAction.InitializeMonitoringAction::class.java).compose(
+                        initializeMonitoringProcessor
+                    ),
                     shared.ofType(MonitoringAction.StopMonitoringAction::class.java).compose(stopMonitoringProcessor),
-                    shared.ofType(MonitoringAction.AlertMonitoringAction::class.java).compose(alertMonitoringProcessor)
+                    shared.ofType(MonitoringAction.DisplayAlertMonitoringAction::class.java).compose(
+                        displayAlertMonitoringDisplayProcessor
+                    )
+                ).mergeWith(
+                    shared.ofType(MonitoringAction.CloseAlertMonitoringAction::class.java).compose(
+                        closeAlertMonitoringDisplayProcessor
+                    )
                 )
             }
         }
@@ -42,11 +50,18 @@ class MonitoringActionProcessor @Inject constructor() {
             }
         }
 
-    private val alertMonitoringProcessor: ObservableTransformer<MonitoringAction.AlertMonitoringAction, MonitoringResult.MonitoringAlert> =
+    private val displayAlertMonitoringDisplayProcessor: ObservableTransformer<MonitoringAction.DisplayAlertMonitoringAction, MonitoringResult.MonitoringDisplayAlert> =
         ObservableTransformer { actions ->
             actions.map { action ->
                 val message = action.message
-                MonitoringResult.MonitoringAlert(message)
+                MonitoringResult.MonitoringDisplayAlert(message)
+            }
+        }
+
+    private val closeAlertMonitoringDisplayProcessor: ObservableTransformer<MonitoringAction.CloseAlertMonitoringAction, MonitoringResult.MonitoringClosedAlert> =
+        ObservableTransformer { action ->
+            action.flatMap {
+                Observable.just(MonitoringResult.MonitoringClosedAlert)
             }
         }
 

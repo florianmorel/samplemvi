@@ -6,5 +6,6 @@ sealed class MonitoringAction : MviAction {
     object StartMonitoringAction : MonitoringAction()
     object StopMonitoringAction : MonitoringAction()
     object InitializeMonitoringAction : MonitoringAction()
-    data class AlertMonitoringAction(val message: String) : MonitoringAction()
+    object CloseAlertMonitoringAction : MonitoringAction()
+    data class DisplayAlertMonitoringAction(val message: String) : MonitoringAction()
 }
