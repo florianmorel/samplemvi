@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
+import android.widget.Toast
 import com.fm.mvi.base.MviView
 import com.fm.mvi.model.MonitoringIntents
 import com.fm.mvi.model.MonitoringViewState
@@ -39,10 +40,12 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
         initViews()
         disposables += viewModel.states().observeOn(AndroidSchedulers.mainThread()).subscribe(this::render)
         viewModel.processIntents(intents())
+        viewModel.registerAlertService()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        viewModel.unregisterAlertService()
         disposables.clear()
     }
 
@@ -71,9 +74,10 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
     }
 
     override fun render(state: MonitoringViewState) = when (state) {
-        MonitoringViewState.Stopped -> renderStoppedState()
-        MonitoringViewState.Initialization -> renderInitializationState()
-        MonitoringViewState.Started -> renderStartedState()
+        is MonitoringViewState.Stopped -> renderStoppedState()
+        is MonitoringViewState.Initialization -> renderInitializationState()
+        is MonitoringViewState.Started -> renderStartedState()
+        is MonitoringViewState.Alert -> renderAlert(state.alertMessage)
     }
 
     private fun renderStoppedState() {
@@ -93,6 +97,10 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
         indicator.setImageResource(R.drawable.green_light_indicator)
         disableView(start_button)
         enableView(stop_button)
+    }
+
+    private fun renderAlert(alertMessage: String) {
+        Toast.makeText(this, alertMessage, Toast.LENGTH_SHORT).show()
     }
 
     private fun disableView(v: View) {

@@ -6,4 +6,5 @@ sealed class MonitoringResult : MviResult {
     object MonitoringStarted : MonitoringResult()
     object MonitoringStopped : MonitoringResult()
     object MonitoringInitializing : MonitoringResult()
+    data class MonitoringAlert(val message: String) : MonitoringResult()
 }
