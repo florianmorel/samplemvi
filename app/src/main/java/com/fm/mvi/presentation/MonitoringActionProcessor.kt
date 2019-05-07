@@ -25,6 +25,14 @@ class MonitoringActionProcessor @Inject constructor() {
                     shared.ofType(MonitoringAction.CloseAlertMonitoringAction::class.java).compose(
                         closeAlertMonitoringDisplayProcessor
                     )
+                ).mergeWith(
+                    shared.ofType(MonitoringAction.ErrorMonitoringAction::class.java).compose(
+                        errorMonitoringProcessor
+                    )
+                ).mergeWith(
+                    shared.ofType(MonitoringAction.ResetErrorMonitoringAction::class.java).compose(
+                        resetMonitoringProcessor
+                    )
                 )
             }
         }
@@ -53,15 +61,28 @@ class MonitoringActionProcessor @Inject constructor() {
     private val displayAlertMonitoringDisplayProcessor: ObservableTransformer<MonitoringAction.DisplayAlertMonitoringAction, MonitoringResult.MonitoringDisplayAlert> =
         ObservableTransformer { actions ->
             actions.map { action ->
-                val message = action.message
-                MonitoringResult.MonitoringDisplayAlert(message)
+                MonitoringResult.MonitoringDisplayAlert(action.message)
             }
         }
 
     private val closeAlertMonitoringDisplayProcessor: ObservableTransformer<MonitoringAction.CloseAlertMonitoringAction, MonitoringResult.MonitoringClosedAlert> =
+        ObservableTransformer { actions ->
+            actions.map {action->
+                MonitoringResult.MonitoringClosedAlert(action.pendingError)
+            }
+        }
+
+    private val errorMonitoringProcessor: ObservableTransformer<MonitoringAction.ErrorMonitoringAction, MonitoringResult.MonitoringError> =
         ObservableTransformer { action ->
             action.flatMap {
-                Observable.just(MonitoringResult.MonitoringClosedAlert)
+                Observable.just(MonitoringResult.MonitoringError)
+            }
+        }
+
+    private val resetMonitoringProcessor: ObservableTransformer<MonitoringAction.ResetErrorMonitoringAction, MonitoringResult.MonitoringReset> =
+        ObservableTransformer { action ->
+            action.flatMap {
+                Observable.just(MonitoringResult.MonitoringReset)
             }
         }
 

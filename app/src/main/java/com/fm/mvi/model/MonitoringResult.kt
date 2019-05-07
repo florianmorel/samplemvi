@@ -7,5 +7,7 @@ sealed class MonitoringResult : MviResult {
     object MonitoringStopped : MonitoringResult()
     object MonitoringInitializing : MonitoringResult()
     data class MonitoringDisplayAlert(val message: String) : MonitoringResult()
-    object MonitoringClosedAlert : MonitoringResult()
+    data class MonitoringClosedAlert(val pendingError: Boolean) : MonitoringResult()
+    object MonitoringError : MonitoringResult()
+    object MonitoringReset : MonitoringResult()
 }
