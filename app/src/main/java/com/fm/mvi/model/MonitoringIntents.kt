@@ -6,5 +6,6 @@ sealed class MonitoringIntents : MviIntent {
     object StartMonitoringIntent : MonitoringIntents()
     object StopMonitoringIntent : MonitoringIntents()
     object InitializeMonitoringIntent : MonitoringIntents()
-    data class AlertMonitoringIntent(val message: String) : MonitoringIntents()
+    object CloseAlertMonitoringIntent : MonitoringIntents()
+    data class ReceivedAlertMonitoringIntent(val message: String) : MonitoringIntents()
 }

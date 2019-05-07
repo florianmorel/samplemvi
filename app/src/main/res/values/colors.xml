@@ -3,7 +3,10 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+	<color name="MviBlackColor">#000000</color>
+	<color name="MviWhiteColor">#FFFFFF</color>
 	<color name="MviGreenColor">#00FF00</color>
     <color name="MviRedColor">#FF0000</color>
     <color name="MviOrangeColor">#FF8200</color>
+    <color name="MviPurpleColor">#9400D3</color>
 </resources>

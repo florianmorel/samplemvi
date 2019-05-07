@@ -4,7 +4,6 @@ import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
-import android.widget.Toast
 import com.fm.mvi.base.MviView
 import com.fm.mvi.model.MonitoringIntents
 import com.fm.mvi.model.MonitoringViewState
@@ -38,23 +37,26 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
         AndroidInjection.inject(this)
         setContentView(R.layout.activity_main)
         initViews()
-        disposables += viewModel.states().observeOn(AndroidSchedulers.mainThread()).subscribe(this::render)
-        viewModel.processIntents(intents())
-        viewModel.registerAlertService()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        viewModel.unregisterAlertService()
+    override fun onStart() {
+        super.onStart()
+        disposables += viewModel.states().observeOn(AndroidSchedulers.mainThread()).subscribe(this::render)
+        disposables += viewModel.registerAlertService()
+        viewModel.processIntents(intents())
+    }
+
+    override fun onStop() {
+        super.onStop()
         disposables.clear()
     }
 
     private fun initViews() {
-        indicator.setImageResource(R.drawable.red_light_indicator)
+        indicator.setImageResource(R.drawable.error_indicator)
     }
 
     override fun intents(): Observable<MonitoringIntents> {
-        return Observable.merge(stopEvent(), startEvent(), initializeIntent)
+        return Observable.merge(stopEvent(), startEvent(), initializeIntent, closeAlertEvent())
     }
 
     private fun stopEvent(): Observable<MonitoringIntents.StopMonitoringIntent> {
@@ -73,6 +75,10 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
         return RxView.clicks(start_button).map { MonitoringIntents.StartMonitoringIntent }
     }
 
+    private fun closeAlertEvent(): Observable<MonitoringIntents.CloseAlertMonitoringIntent> {
+        return RxView.clicks(close_button).map { MonitoringIntents.CloseAlertMonitoringIntent }
+    }
+
     override fun render(state: MonitoringViewState) = when (state) {
         is MonitoringViewState.Stopped -> renderStoppedState()
         is MonitoringViewState.Initialization -> renderInitializationState()
@@ -81,30 +87,41 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
     }
 
     private fun renderStoppedState() {
-        indicator.setImageResource(R.drawable.red_light_indicator)
-        disableView(stop_button)
+        indicator.setImageResource(R.drawable.stop_indicator)
         enableView(start_button)
+        disableView(stop_button)
+        disableView(alert_message_dialog)
+        current_state.text = getString(R.string.current_state, getString(R.string.state_stopped))
     }
 
     private fun renderInitializationState() {
-        indicator.setImageResource(R.drawable.orange_light_indicator)
+        indicator.setImageResource(R.drawable.init_indicator)
         initializationEvent()
         disableView(stop_button)
         disableView(start_button)
+        disableView(alert_message_dialog)
+        current_state.text = getString(R.string.current_state, getString(R.string.state_initializing))
     }
 
     private fun renderStartedState() {
-        indicator.setImageResource(R.drawable.green_light_indicator)
-        disableView(start_button)
+        indicator.setImageResource(R.drawable.start_indicator)
         enableView(stop_button)
+        disableView(start_button)
+        disableView(alert_message_dialog)
+        current_state.text = getString(R.string.current_state, getString(R.string.state_started))
     }
 
     private fun renderAlert(alertMessage: String) {
-        Toast.makeText(this, alertMessage, Toast.LENGTH_SHORT).show()
+        indicator.setImageResource(R.drawable.alert_indicator)
+        enableView(alert_message_dialog)
+        disableView(start_button)
+        disableView(stop_button)
+        alert_message.text = alertMessage
+        current_state.text = getString(R.string.current_state, getString(R.string.state_alert))
     }
 
     private fun disableView(v: View) {
-        v.visibility = View.INVISIBLE
+        v.visibility = View.GONE
     }
 
     private fun enableView(v: View) {

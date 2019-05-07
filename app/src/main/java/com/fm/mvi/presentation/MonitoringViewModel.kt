@@ -10,9 +10,8 @@ import com.fm.mvi.service.Alert
 import com.fm.mvi.service.AlertMessage
 import com.fm.mvi.service.AlertService
 import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.functions.BiFunction
-import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.subjects.PublishSubject
 import javax.inject.Singleton
 
@@ -27,7 +26,6 @@ class MonitoringViewModel(
     private val intentsSubject: PublishSubject<MonitoringIntents> = PublishSubject.create()
     private val mStatesObservable: Observable<MonitoringViewState> = compose()
     private val mAlertsObservable: Observable<AlertMessage> = alertService.stackOfAlert
-    private val disposables = CompositeDisposable()
 
     override fun processIntents(intents: Observable<MonitoringIntents>) {
         intents.subscribe(intentsSubject)
@@ -35,25 +33,20 @@ class MonitoringViewModel(
 
     override fun states(): Observable<MonitoringViewState> = mStatesObservable
 
-    fun registerAlertService() {
-        disposables += mAlertsObservable
-            .map { alertMessage: AlertMessage ->
-                when (alertMessage) {
-                    is Alert -> intentsSubject.onNext(MonitoringIntents.AlertMonitoringIntent(alertMessage.description))
-                }
+    fun registerAlertService(): Disposable = mAlertsObservable
+        .map { alertMessage: AlertMessage ->
+            when (alertMessage) {
+                is Alert -> intentsSubject.onNext(MonitoringIntents.ReceivedAlertMonitoringIntent(alertMessage.description))
             }
-            .subscribe()
-    }
-
-    fun unregisterAlertService() {
-        disposables.clear()
-    }
+        }
+        .subscribe()
 
     private fun actionFromIntent(intent: MonitoringIntents): MonitoringAction = when (intent) {
         is MonitoringIntents.StartMonitoringIntent -> MonitoringAction.InitializeMonitoringAction
         is MonitoringIntents.StopMonitoringIntent -> MonitoringAction.StopMonitoringAction
         is MonitoringIntents.InitializeMonitoringIntent -> MonitoringAction.StartMonitoringAction
-        is MonitoringIntents.AlertMonitoringIntent -> MonitoringAction.AlertMonitoringAction(intent.message)
+        is MonitoringIntents.ReceivedAlertMonitoringIntent -> MonitoringAction.DisplayAlertMonitoringAction(intent.message)
+        is MonitoringIntents.CloseAlertMonitoringIntent -> MonitoringAction.CloseAlertMonitoringAction
     }
 
     private fun compose(): Observable<MonitoringViewState> {
@@ -73,7 +66,13 @@ class MonitoringViewModel(
                     is MonitoringResult.MonitoringStopped -> MonitoringViewState.Stopped
                     is MonitoringResult.MonitoringInitializing -> MonitoringViewState.Initialization
                     is MonitoringResult.MonitoringStarted -> MonitoringViewState.Started
-                    is MonitoringResult.MonitoringAlert -> MonitoringViewState.Alert(result.message)
+                    is MonitoringResult.MonitoringDisplayAlert -> when (previousState) {
+                        MonitoringViewState.Started -> MonitoringViewState.Alert(result.message)
+                        else -> {
+                            previousState
+                        }
+                    }
+                    is MonitoringResult.MonitoringClosedAlert -> MonitoringViewState.Started
                 }
             }
     }
