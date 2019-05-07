@@ -10,7 +10,6 @@ import com.fm.mvi.model.MonitoringIntents
 import com.fm.mvi.model.MonitoringViewState
 import com.fm.mvi.presentation.MonitoringViewModel
 import com.fm.mvi.presentation.MonitoringViewModelFactory
-import com.fm.mvi.service.AlertMessage
 import com.jakewharton.rxbinding2.view.RxView
 import dagger.android.AndroidInjection
 import io.reactivex.Observable
@@ -46,6 +45,7 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
 
     override fun onDestroy() {
         super.onDestroy()
+        viewModel.unregisterAlertService()
         disposables.clear()
     }
 
@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
         enableView(stop_button)
     }
 
-    private fun renderAlert(alertMessage: String){
+    private fun renderAlert(alertMessage: String) {
         Toast.makeText(this, alertMessage, Toast.LENGTH_SHORT).show()
     }
 

@@ -6,25 +6,28 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AlertService @Inject constructor(){
+class AlertService @Inject constructor() {
 
     companion object {
 
-        val ALERT_SENSOR_UNPLUGGED = AlertMessage.Alert("Sensor Unplugged Alert")
-        val ALERT_SENSOR_POSITION = AlertMessage.Alert("Sensor Position Alert")
-        val ALERT_LOST_CONNECTION = AlertMessage.Alert("Lost Connection Alert")
-        val ERROR = AlertMessage.Error
+        private val ALERT_SENSOR_UNPLUGGED = Alert("Sensor Unplugged Alert")
+        private val ALERT_SENSOR_POSITION = Alert("Sensor Position Alert")
+        private val ALERT_LOST_CONNECTION = Alert("Lost Connection Alert")
+        private val ERROR = Error
 
-        val collectionAlert = mapOf(
-            15L to ALERT_LOST_CONNECTION,
-            30L to ALERT_SENSOR_POSITION,
-            50L to ERROR,
-            70L to ALERT_SENSOR_UNPLUGGED
+        val alertCollection = mapOf<Long, AlertMessage>(
+            5L to ALERT_LOST_CONNECTION,
+            10L to ALERT_SENSOR_POSITION,
+            6L to ALERT_SENSOR_UNPLUGGED,
+            8L to ERROR
         )
     }
 
-    val stackOfAlert : Observable<AlertMessage> = Observable.fromIterable(collectionAlert.keys).concatMap { key ->
-        Observable.just(collectionAlert.getValue(key)).delay(key, TimeUnit.SECONDS)
-    }
+    val stackOfAlert: Observable<AlertMessage> = Observable
+        .fromIterable(alertCollection.keys)
+        .concatMap { key ->
+            Observable.just(alertCollection.getValue(key)).delay(key, TimeUnit.SECONDS)
+        }
+        .repeat()
 
 }

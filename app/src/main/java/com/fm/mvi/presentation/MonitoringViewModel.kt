@@ -1,18 +1,18 @@
 package com.fm.mvi.presentation
 
 import android.arch.lifecycle.ViewModel
-import com.fm.mvi.base.MviAction
-import com.fm.mvi.base.MviIntent
 import com.fm.mvi.base.MviViewModel
 import com.fm.mvi.model.MonitoringAction
 import com.fm.mvi.model.MonitoringIntents
 import com.fm.mvi.model.MonitoringResult
 import com.fm.mvi.model.MonitoringViewState
+import com.fm.mvi.service.Alert
 import com.fm.mvi.service.AlertMessage
 import com.fm.mvi.service.AlertService
 import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.BiFunction
-import io.reactivex.functions.Consumer
+import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.subjects.PublishSubject
 import javax.inject.Singleton
 
@@ -27,6 +27,7 @@ class MonitoringViewModel(
     private val intentsSubject: PublishSubject<MonitoringIntents> = PublishSubject.create()
     private val mStatesObservable: Observable<MonitoringViewState> = compose()
     private val mAlertsObservable: Observable<AlertMessage> = alertService.stackOfAlert
+    private val disposables = CompositeDisposable()
 
     override fun processIntents(intents: Observable<MonitoringIntents>) {
         intents.subscribe(intentsSubject)
@@ -35,18 +36,19 @@ class MonitoringViewModel(
     override fun states(): Observable<MonitoringViewState> = mStatesObservable
 
     fun registerAlertService() {
-        mAlertsObservable
+        disposables += mAlertsObservable
             .map { alertMessage: AlertMessage ->
                 when (alertMessage) {
-                    is AlertMessage.Alert -> intentsSubject.onNext(MonitoringIntents.AlertMonitoringIntent(alertMessage.description))
+                    is Alert -> intentsSubject.onNext(MonitoringIntents.AlertMonitoringIntent(alertMessage.description))
                 }
             }
             .subscribe()
     }
 
-    /**
-     * Translate an [MviIntent] to an [MviAction].
-     */
+    fun unregisterAlertService() {
+        disposables.clear()
+    }
+
     private fun actionFromIntent(intent: MonitoringIntents): MonitoringAction = when (intent) {
         is MonitoringIntents.StartMonitoringIntent -> MonitoringAction.InitializeMonitoringAction
         is MonitoringIntents.StopMonitoringIntent -> MonitoringAction.StopMonitoringAction
