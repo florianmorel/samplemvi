@@ -3,10 +3,12 @@
 	<string name="start">start</string>
 	<string name="stop">stop</string>
 	<string name="close">close</string>
+	<string name="reset">reset</string>
 	<string name="alert">Alert:</string>
 	<string name="current_state">State: %1$s</string>
 	<string name="state_stopped">Stopped</string>
 	<string name="state_initializing">Initializing</string>
 	<string name="state_started">Started</string>
 	<string name="state_alert">Alert</string>
+	<string name="state_error">Error</string>
 </resources>

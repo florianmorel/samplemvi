@@ -7,6 +7,7 @@ import com.fm.mvi.model.MonitoringIntents
 import com.fm.mvi.model.MonitoringResult
 import com.fm.mvi.model.MonitoringViewState
 import com.fm.mvi.service.Alert
+import com.fm.mvi.service.Error
 import com.fm.mvi.service.AlertMessage
 import com.fm.mvi.service.AlertService
 import io.reactivex.Observable
@@ -37,6 +38,7 @@ class MonitoringViewModel(
         .map { alertMessage: AlertMessage ->
             when (alertMessage) {
                 is Alert -> intentsSubject.onNext(MonitoringIntents.ReceivedAlertMonitoringIntent(alertMessage.description))
+                is Error -> intentsSubject.onNext(MonitoringIntents.ReceivedErrorMonitoringIntent)
             }
         }
         .subscribe()
@@ -46,7 +48,9 @@ class MonitoringViewModel(
         is MonitoringIntents.StopMonitoringIntent -> MonitoringAction.StopMonitoringAction
         is MonitoringIntents.InitializeMonitoringIntent -> MonitoringAction.StartMonitoringAction
         is MonitoringIntents.ReceivedAlertMonitoringIntent -> MonitoringAction.DisplayAlertMonitoringAction(intent.message)
-        is MonitoringIntents.CloseAlertMonitoringIntent -> MonitoringAction.CloseAlertMonitoringAction
+        is MonitoringIntents.CloseAlertMonitoringIntent -> MonitoringAction.CloseAlertMonitoringAction(intent.pendingError)
+        is MonitoringIntents.ReceivedErrorMonitoringIntent -> MonitoringAction.ErrorMonitoringAction
+        is MonitoringIntents.ResetMonitoringIntent -> MonitoringAction.ResetErrorMonitoringAction
     }
 
     private fun compose(): Observable<MonitoringViewState> {
@@ -67,12 +71,19 @@ class MonitoringViewModel(
                     is MonitoringResult.MonitoringInitializing -> MonitoringViewState.Initialization
                     is MonitoringResult.MonitoringStarted -> MonitoringViewState.Started
                     is MonitoringResult.MonitoringDisplayAlert -> when (previousState) {
-                        MonitoringViewState.Started -> MonitoringViewState.Alert(result.message)
+                        MonitoringViewState.Started -> MonitoringViewState.Alert(alertMessage = result.message)
                         else -> {
                             previousState
                         }
                     }
-                    is MonitoringResult.MonitoringClosedAlert -> MonitoringViewState.Started
+                    is MonitoringResult.MonitoringClosedAlert -> if (result.pendingError) {
+                        MonitoringViewState.Error
+                    } else MonitoringViewState.Started
+                    is MonitoringResult.MonitoringError -> when (previousState) {
+                        is MonitoringViewState.Alert -> previousState.copy(error = true)
+                        else -> MonitoringViewState.Error
+                    }
+                    is MonitoringResult.MonitoringReset -> MonitoringViewState.Stopped
                 }
             }
     }

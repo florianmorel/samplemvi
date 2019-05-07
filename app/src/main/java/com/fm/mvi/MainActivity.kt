@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
     lateinit var factory: MonitoringViewModelFactory
     private val disposables = CompositeDisposable()
     private val initializeIntent = PublishSubject.create<MonitoringIntents.InitializeMonitoringIntent>()
+    private val closeIntent = PublishSubject.create<MonitoringIntents.CloseAlertMonitoringIntent>()
 
     private val viewModel: MonitoringViewModel by lazy {
         ViewModelProviders.of(this, factory).get(MonitoringViewModel::class.java)
@@ -56,7 +57,7 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
     }
 
     override fun intents(): Observable<MonitoringIntents> {
-        return Observable.merge(stopEvent(), startEvent(), initializeIntent, closeAlertEvent())
+        return Observable.merge(stopEvent(), startEvent(), initializeIntent, closeIntent).mergeWith(resetEvent())
     }
 
     private fun stopEvent(): Observable<MonitoringIntents.StopMonitoringIntent> {
@@ -75,15 +76,23 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
         return RxView.clicks(start_button).map { MonitoringIntents.StartMonitoringIntent }
     }
 
-    private fun closeAlertEvent(): Observable<MonitoringIntents.CloseAlertMonitoringIntent> {
-        return RxView.clicks(close_button).map { MonitoringIntents.CloseAlertMonitoringIntent }
+//    private fun closeAlertEvent(): Observable<MonitoringIntents.CloseAlertMonitoringIntent> {
+//        return RxView.clicks(close_button)
+//            .map { MonitoringIntents.CloseAlertMonitoringIntent(pendingError = getPendingErrorState()) }
+//    }
+
+    private fun resetEvent(): Observable<MonitoringIntents.ResetMonitoringIntent> {
+        return RxView.clicks(reset_button).map { MonitoringIntents.ResetMonitoringIntent }
     }
 
-    override fun render(state: MonitoringViewState) = when (state) {
-        is MonitoringViewState.Stopped -> renderStoppedState()
-        is MonitoringViewState.Initialization -> renderInitializationState()
-        is MonitoringViewState.Started -> renderStartedState()
-        is MonitoringViewState.Alert -> renderAlert(state.alertMessage)
+    override fun render(state: MonitoringViewState) {
+        when (state) {
+            is MonitoringViewState.Stopped -> renderStoppedState()
+            is MonitoringViewState.Initialization -> renderInitializationState()
+            is MonitoringViewState.Started -> renderStartedState()
+            is MonitoringViewState.Alert -> renderAlert(state.alertMessage, state.error)
+            is MonitoringViewState.Error -> renderError()
+        }
     }
 
     private fun renderStoppedState() {
@@ -91,6 +100,7 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
         enableView(start_button)
         disableView(stop_button)
         disableView(alert_message_dialog)
+        disableView(reset_button)
         current_state.text = getString(R.string.current_state, getString(R.string.state_stopped))
     }
 
@@ -100,6 +110,7 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
         disableView(stop_button)
         disableView(start_button)
         disableView(alert_message_dialog)
+        disableView(reset_button)
         current_state.text = getString(R.string.current_state, getString(R.string.state_initializing))
     }
 
@@ -108,16 +119,28 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
         enableView(stop_button)
         disableView(start_button)
         disableView(alert_message_dialog)
+        disableView(reset_button)
         current_state.text = getString(R.string.current_state, getString(R.string.state_started))
     }
 
-    private fun renderAlert(alertMessage: String) {
+    private fun renderAlert(alertMessage: String, errorPending: Boolean) {
         indicator.setImageResource(R.drawable.alert_indicator)
         enableView(alert_message_dialog)
         disableView(start_button)
         disableView(stop_button)
+        disableView(reset_button)
         alert_message.text = alertMessage
         current_state.text = getString(R.string.current_state, getString(R.string.state_alert))
+        close_button.setOnClickListener { closeIntent.onNext(MonitoringIntents.CloseAlertMonitoringIntent(pendingError = errorPending))  }
+    }
+
+    private fun renderError() {
+        indicator.setImageResource(R.drawable.error_indicator)
+        disableView(alert_message_dialog)
+        disableView(start_button)
+        disableView(stop_button)
+        enableView(reset_button)
+        current_state.text = getString(R.string.current_state, getString(R.string.state_error))
     }
 
     private fun disableView(v: View) {

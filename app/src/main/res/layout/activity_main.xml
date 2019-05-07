@@ -73,6 +73,15 @@
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toBottomOf="@id/start_button" />
 
+	<Button
+		android:id="@+id/reset_button"
+		android:layout_width="match_parent"
+		android:layout_height="44dp"
+		android:text="@string/reset"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@id/stop_button" />
+
 	<ImageView
 		android:id="@+id/indicator"
 		android:layout_width="80dp"
