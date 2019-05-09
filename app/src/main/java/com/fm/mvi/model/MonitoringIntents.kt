@@ -5,7 +5,7 @@ import com.fm.mvi.base.MviIntent
 sealed class MonitoringIntents : MviIntent {
     object StartMonitoringIntent : MonitoringIntents()
     object StopMonitoringIntent : MonitoringIntents()
-    object InitializeMonitoringIntent : MonitoringIntents()
+    object InitializedMonitoringIntent : MonitoringIntents()
     data class CloseAlertMonitoringIntent(val pendingError: Boolean) : MonitoringIntents()
     data class ReceivedAlertMonitoringIntent(val message: String) : MonitoringIntents()
     object ReceivedErrorMonitoringIntent : MonitoringIntents()

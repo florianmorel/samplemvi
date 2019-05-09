@@ -14,6 +14,7 @@ import dagger.android.AndroidInjection
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
@@ -26,7 +27,8 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
     @Inject
     lateinit var factory: MonitoringViewModelFactory
     private val disposables = CompositeDisposable()
-    private val initializeIntent = PublishSubject.create<MonitoringIntents.InitializeMonitoringIntent>()
+    private var initStateDisposable: Disposable? = null
+    private val initializeIntent = PublishSubject.create<MonitoringIntents.InitializedMonitoringIntent>()
     private val closeIntent = PublishSubject.create<MonitoringIntents.CloseAlertMonitoringIntent>()
 
     private val viewModel: MonitoringViewModel by lazy {
@@ -60,8 +62,8 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
     }
 
     private fun initializationEvent() {
-        Observable.timer(3, TimeUnit.SECONDS)
-            .map { t -> initializeIntent.onNext(MonitoringIntents.InitializeMonitoringIntent) }
+        initStateDisposable = Observable.timer(3, TimeUnit.SECONDS)
+            .map { t -> initializeIntent.onNext(MonitoringIntents.InitializedMonitoringIntent) }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe()
@@ -141,6 +143,7 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
     }
 
     private fun renderError() {
+        stopInitStateEmission()
         disableView(alert_message_dialog)
         disableView(start_button)
         disableView(stop_button)
@@ -159,5 +162,13 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
 
     private fun enableView(v: View) {
         v.visibility = View.VISIBLE
+    }
+
+    private fun stopInitStateEmission() {
+        initStateDisposable?.let {
+            if (it.isDisposed.not()) {
+                it.dispose()
+            }
+        }
     }
 }
