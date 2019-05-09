@@ -4,6 +4,8 @@
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
+	android:background="@color/MviBackgroundColor"
+	android:padding="10dp"
 	tools:context=".MainActivity">
 
 	<android.support.constraint.ConstraintLayout
@@ -47,7 +49,9 @@
 			android:id="@+id/close_button"
 			android:layout_width="match_parent"
 			android:layout_height="44dp"
+			android:background="@drawable/button_background"
 			android:text="@string/close"
+			android:textColor="@color/MviWhiteColor"
 			app:layout_constraintBottom_toBottomOf="parent"
 			app:layout_constraintEnd_toEndOf="parent"
 			app:layout_constraintStart_toStartOf="parent"
@@ -59,7 +63,9 @@
 		android:id="@+id/start_button"
 		android:layout_width="match_parent"
 		android:layout_height="44dp"
+		android:background="@drawable/button_background"
 		android:text="@string/start"
+		android:textColor="@color/MviWhiteColor"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toBottomOf="@id/alert_message_dialog" />
@@ -68,7 +74,9 @@
 		android:id="@+id/stop_button"
 		android:layout_width="match_parent"
 		android:layout_height="44dp"
+		android:background="@drawable/button_background"
 		android:text="@string/stop"
+		android:textColor="@color/MviWhiteColor"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toBottomOf="@id/start_button" />
@@ -77,20 +85,102 @@
 		android:id="@+id/reset_button"
 		android:layout_width="match_parent"
 		android:layout_height="44dp"
+		android:background="@drawable/button_background"
 		android:text="@string/reset"
+		android:textColor="@color/MviWhiteColor"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toBottomOf="@id/stop_button" />
 
-	<ImageView
-		android:id="@+id/indicator"
-		android:layout_width="80dp"
-		android:layout_height="80dp"
-		android:src="@drawable/start_indicator"
+	<android.support.constraint.ConstraintLayout
+		android:layout_width="300dp"
+		android:layout_height="300dp"
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toTopOf="parent" />
+		app:layout_constraintTop_toTopOf="parent">
+
+		<android.support.constraint.Guideline
+			android:id="@+id/v_guide"
+			android:layout_width="1dp"
+			android:layout_height="1dp"
+			android:orientation="vertical"
+			app:layout_constraintBottom_toBottomOf="parent"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintGuide_percent="0.5"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toTopOf="parent" />
+
+		<android.support.constraint.Guideline
+			android:id="@+id/h_guide"
+			android:layout_width="1dp"
+			android:layout_height="1dp"
+			android:orientation="horizontal"
+			app:layout_constraintBottom_toBottomOf="parent"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintGuide_percent="0.5"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toTopOf="parent" />
+
+		<com.fm.mvi.widget.MonitoringStateImageImageView
+			android:id="@+id/indicator_stopped"
+			android:layout_width="100dp"
+			android:layout_height="100dp"
+			android:src="@drawable/stop_state"
+			app:layout_constraintBottom_toTopOf="@id/h_guide"
+			app:layout_constraintEnd_toStartOf="@id/v_guide"
+			app:state="stopped" />
+
+		<com.fm.mvi.widget.MonitoringStateImageImageView
+			android:id="@+id/indicator_init"
+			android:layout_width="100dp"
+			android:layout_height="100dp"
+			android:src="@drawable/init_state"
+			app:layout_constraintBottom_toTopOf="@id/h_guide"
+			app:layout_constraintStart_toEndOf="@id/v_guide"
+			app:state="initializing" />
+
+		<com.fm.mvi.widget.MonitoringStateImageImageView
+			android:id="@+id/indicator_started"
+			android:layout_width="100dp"
+			android:layout_height="100dp"
+			android:src="@drawable/start_state"
+			app:layout_constraintStart_toEndOf="@id/v_guide"
+			app:layout_constraintTop_toBottomOf="@id/h_guide"
+			app:state="started" />
+
+		<com.fm.mvi.widget.MonitoringStateImageImageView
+			android:id="@+id/indicator_alert"
+			android:layout_width="100dp"
+			android:layout_height="100dp"
+			android:src="@drawable/alert_state"
+			app:layout_constraintEnd_toStartOf="@id/v_guide"
+			app:layout_constraintTop_toBottomOf="@id/h_guide"
+			app:state="alert" />
+
+		<com.fm.mvi.widget.MonitoringStateImageImageView
+			android:id="@+id/indicator_stub"
+			android:layout_width="100dp"
+			android:layout_height="100dp"
+			android:src="@drawable/stub_state"
+			app:layout_constraintBottom_toBottomOf="parent"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toTopOf="parent"
+			app:state="unknown" />
+
+		<com.fm.mvi.widget.MonitoringStateImageImageView
+			android:id="@+id/indicator_error"
+			android:layout_width="100dp"
+			android:layout_height="100dp"
+			android:src="@drawable/error_state"
+			app:layout_constraintBottom_toBottomOf="parent"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toTopOf="parent"
+			app:state="error" />
+
+	</android.support.constraint.ConstraintLayout>
 
 	<TextView
 		android:id="@+id/current_state"

@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
+	<color name="colorPrimary">#008577</color>
+	<color name="colorPrimaryDark">#00574B</color>
+	<color name="colorAccent">#D81B60</color>
 	<color name="MviBlackColor">#000000</color>
 	<color name="MviWhiteColor">#FFFFFF</color>
-	<color name="MviGreenColor">#00FF00</color>
-    <color name="MviRedColor">#FF0000</color>
-    <color name="MviOrangeColor">#FF8200</color>
-    <color name="MviPurpleColor">#9400D3</color>
+	<color name="MviBlueColor">#3399FF</color>
+	<color name="MviBackgroundColor">#D3D3D3</color>
+
+	<color name="MviStopState">#51D2EE</color>
+	<color name="MviStartState">#00FF00</color>
+	<color name="MviInitState">#ADFF2F</color>
+	<color name="MviAlertState">#FF8C00</color>
+	<color name="MviErrorState">#FF0000</color>
 </resources>

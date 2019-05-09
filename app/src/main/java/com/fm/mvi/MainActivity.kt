@@ -37,7 +37,6 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
         super.onCreate(savedInstanceState)
         AndroidInjection.inject(this)
         setContentView(R.layout.activity_main)
-        initViews()
     }
 
     override fun onStart() {
@@ -50,10 +49,6 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
     override fun onStop() {
         super.onStop()
         disposables.clear()
-    }
-
-    private fun initViews() {
-        indicator.setImageResource(R.drawable.error_indicator)
     }
 
     override fun intents(): Observable<MonitoringIntents> {
@@ -76,11 +71,6 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
         return RxView.clicks(start_button).map { MonitoringIntents.StartMonitoringIntent }
     }
 
-//    private fun closeAlertEvent(): Observable<MonitoringIntents.CloseAlertMonitoringIntent> {
-//        return RxView.clicks(close_button)
-//            .map { MonitoringIntents.CloseAlertMonitoringIntent(pendingError = getPendingErrorState()) }
-//    }
-
     private fun resetEvent(): Observable<MonitoringIntents.ResetMonitoringIntent> {
         return RxView.clicks(reset_button).map { MonitoringIntents.ResetMonitoringIntent }
     }
@@ -96,50 +86,70 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
     }
 
     private fun renderStoppedState() {
-        indicator.setImageResource(R.drawable.stop_indicator)
         enableView(start_button)
         disableView(stop_button)
         disableView(alert_message_dialog)
         disableView(reset_button)
+        indicator_stopped.enableState()
+        indicator_started.disableState()
+        indicator_init.disableState()
+        indicator_alert.disableState()
+        indicator_error.disableState()
         current_state.text = getString(R.string.current_state, getString(R.string.state_stopped))
     }
 
     private fun renderInitializationState() {
-        indicator.setImageResource(R.drawable.init_indicator)
         initializationEvent()
         disableView(stop_button)
         disableView(start_button)
         disableView(alert_message_dialog)
         disableView(reset_button)
+        indicator_init.enableState()
+        indicator_started.disableState()
+        indicator_stopped.disableState()
+        indicator_alert.disableState()
+        indicator_error.disableState()
         current_state.text = getString(R.string.current_state, getString(R.string.state_initializing))
     }
 
     private fun renderStartedState() {
-        indicator.setImageResource(R.drawable.start_indicator)
         enableView(stop_button)
         disableView(start_button)
         disableView(alert_message_dialog)
         disableView(reset_button)
+        indicator_init.disableState()
+        indicator_started.enableState()
+        indicator_stopped.disableState()
+        indicator_alert.disableState()
+        indicator_error.disableState()
         current_state.text = getString(R.string.current_state, getString(R.string.state_started))
     }
 
     private fun renderAlert(alertMessage: String, errorPending: Boolean) {
-        indicator.setImageResource(R.drawable.alert_indicator)
         enableView(alert_message_dialog)
         disableView(start_button)
         disableView(stop_button)
         disableView(reset_button)
+        indicator_init.disableState()
+        indicator_started.disableState()
+        indicator_stopped.disableState()
+        indicator_alert.enableState()
+        indicator_error.disableState()
         alert_message.text = alertMessage
         current_state.text = getString(R.string.current_state, getString(R.string.state_alert))
-        close_button.setOnClickListener { closeIntent.onNext(MonitoringIntents.CloseAlertMonitoringIntent(pendingError = errorPending))  }
+        close_button.setOnClickListener { closeIntent.onNext(MonitoringIntents.CloseAlertMonitoringIntent(pendingError = errorPending)) }
     }
 
     private fun renderError() {
-        indicator.setImageResource(R.drawable.error_indicator)
         disableView(alert_message_dialog)
         disableView(start_button)
         disableView(stop_button)
         enableView(reset_button)
+        indicator_init.disableState()
+        indicator_started.disableState()
+        indicator_stopped.disableState()
+        indicator_alert.disableState()
+        indicator_error.enableState()
         current_state.text = getString(R.string.current_state, getString(R.string.state_error))
     }
 
@@ -150,5 +160,4 @@ class MainActivity : AppCompatActivity(), MviView<MonitoringIntents, MonitoringV
     private fun enableView(v: View) {
         v.visibility = View.VISIBLE
     }
-
 }
