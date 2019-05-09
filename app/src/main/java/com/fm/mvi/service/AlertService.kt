@@ -19,7 +19,7 @@ class AlertService @Inject constructor() {
             5L to ALERT_LOST_CONNECTION,
             10L to ALERT_SENSOR_POSITION,
             6L to ALERT_SENSOR_UNPLUGGED,
-            8L to ERROR
+            5L to ERROR
         )
     }
 

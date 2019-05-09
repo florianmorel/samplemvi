@@ -46,7 +46,7 @@ class MonitoringViewModel(
     private fun actionFromIntent(intent: MonitoringIntents): MonitoringAction = when (intent) {
         is MonitoringIntents.StartMonitoringIntent -> MonitoringAction.InitializeMonitoringAction
         is MonitoringIntents.StopMonitoringIntent -> MonitoringAction.StopMonitoringAction
-        is MonitoringIntents.InitializeMonitoringIntent -> MonitoringAction.StartMonitoringAction
+        is MonitoringIntents.InitializedMonitoringIntent -> MonitoringAction.StartMonitoringAction
         is MonitoringIntents.ReceivedAlertMonitoringIntent -> MonitoringAction.DisplayAlertMonitoringAction(intent.message)
         is MonitoringIntents.CloseAlertMonitoringIntent -> MonitoringAction.CloseAlertMonitoringAction(intent.pendingError)
         is MonitoringIntents.ReceivedErrorMonitoringIntent -> MonitoringAction.ErrorMonitoringAction
