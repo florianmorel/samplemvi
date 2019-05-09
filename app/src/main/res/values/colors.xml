@@ -7,7 +7,6 @@
 	<color name="MviWhiteColor">#FFFFFF</color>
 	<color name="MviBlueColor">#3399FF</color>
 	<color name="MviBackgroundColor">#D3D3D3</color>
-
 	<color name="MviStopState">#51D2EE</color>
 	<color name="MviStartState">#00FF00</color>
 	<color name="MviInitState">#ADFF2F</color>
