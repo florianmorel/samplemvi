@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<declare-styleable name="MonitoringStateImageImageView">
+		<attr name="state" format="enum">
+			<enum name="stopped" value="0" />
+			<enum name="initializing" value="1" />
+			<enum name="started" value="2" />
+			<enum name="alert" value="3" />
+			<enum name="error" value="4" />
+			<enum name="unknown" value="5" />
+		</attr>
+	</declare-styleable>
+</resources>
