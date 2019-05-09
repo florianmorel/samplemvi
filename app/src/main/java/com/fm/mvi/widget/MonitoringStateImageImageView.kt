@@ -12,7 +12,7 @@ class MonitoringStateImageImageView @JvmOverloads constructor(context: Context, 
 
     private lateinit var enterAnimation: Animation
     private lateinit var exitAnimation: Animation
-    private var setupAnimation: Animation = AnimationUtils.loadAnimation(context, R.anim.setup_animation)
+    private lateinit var setupAnimation: Animation
 
     private var isEnable: Boolean = false
 
@@ -31,6 +31,7 @@ class MonitoringStateImageImageView @JvmOverloads constructor(context: Context, 
                 val state = getString(R.styleable.MonitoringStateImageImageView_state)
                 enterAnimation = MonitoringImageViewUtil.selectEnterStateTransition(context, state)
                 exitAnimation = MonitoringImageViewUtil.selectExitStateTransition(context, state)
+                setupAnimation = MonitoringImageViewUtil.selectSetupStateTransition(context, state)
                 recycle()
             }
         }

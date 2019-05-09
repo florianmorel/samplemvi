@@ -25,7 +25,7 @@ object MonitoringImageViewUtil {
             else -> AnimationUtils.loadAnimation(context, R.anim.no_animation)
         }
 
-    fun selectExitStateTransition(context: Context, state: String): Animation =
+    fun selectExitStateTransition(context: Context, state: String?): Animation =
         when (state) {
             STOPPED -> AnimationUtils.loadAnimation(context, R.anim.exit_stop_animation)
             INITIALIZING -> AnimationUtils.loadAnimation(context, R.anim.exit_init_animation)
@@ -35,5 +35,8 @@ object MonitoringImageViewUtil {
             UNKNOWN -> AnimationUtils.loadAnimation(context, R.anim.no_animation)
             else -> AnimationUtils.loadAnimation(context, R.anim.no_animation)
         }
+
+    fun selectSetupStateTransition(context: Context, state: String?): Animation =
+        AnimationUtils.loadAnimation(context, R.anim.setup_animation)
 
 }

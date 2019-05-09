@@ -111,7 +111,7 @@ class MonitoringViewModelTest {
         monitoringViewModel.processIntents(
             Observable.merge(
                 Observable.just(MonitoringIntents.StartMonitoringIntent),
-                Observable.just(MonitoringIntents.InitializeMonitoringIntent)
+                Observable.just(MonitoringIntents.InitializedMonitoringIntent)
             )
         )
         testObserver.assertValueCount(3)
@@ -127,7 +127,7 @@ class MonitoringViewModelTest {
         monitoringViewModel.processIntents(
             Observable.merge(
                 Observable.just(MonitoringIntents.StartMonitoringIntent),
-                Observable.just(MonitoringIntents.InitializeMonitoringIntent),
+                Observable.just(MonitoringIntents.InitializedMonitoringIntent),
                 Observable.just(alertReceivedIntent)
             )
         )
@@ -141,7 +141,7 @@ class MonitoringViewModelTest {
         monitoringViewModel.processIntents(
             Observable.merge(
                 Observable.just(MonitoringIntents.StartMonitoringIntent),
-                Observable.just(MonitoringIntents.InitializeMonitoringIntent),
+                Observable.just(MonitoringIntents.InitializedMonitoringIntent),
                 Observable.just(errorReceivedIntent)
             )
         )
@@ -155,7 +155,7 @@ class MonitoringViewModelTest {
         monitoringViewModel.processIntents(
             Observable.merge(
                 Observable.just(MonitoringIntents.StartMonitoringIntent),
-                Observable.just(MonitoringIntents.InitializeMonitoringIntent),
+                Observable.just(MonitoringIntents.InitializedMonitoringIntent),
                 Observable.just(MonitoringIntents.StopMonitoringIntent)
             )
         )
@@ -187,7 +187,7 @@ class MonitoringViewModelTest {
         monitoringViewModel.processIntents(
             Observable.merge(
                 Observable.just(MonitoringIntents.StartMonitoringIntent),
-                Observable.just(MonitoringIntents.InitializeMonitoringIntent),
+                Observable.just(MonitoringIntents.InitializedMonitoringIntent),
                 Observable.just(alertReceivedIntent),
                 Observable.just(errorReceivedIntent)
             )
@@ -205,7 +205,7 @@ class MonitoringViewModelTest {
         monitoringViewModel.processIntents(
             Observable.merge(
                 Observable.just(MonitoringIntents.StartMonitoringIntent),
-                Observable.just(MonitoringIntents.InitializeMonitoringIntent),
+                Observable.just(MonitoringIntents.InitializedMonitoringIntent),
                 Observable.just(alertReceivedIntent),
                 Observable.just(MonitoringIntents.CloseAlertMonitoringIntent(false))
             )
@@ -221,7 +221,7 @@ class MonitoringViewModelTest {
         monitoringViewModel.processIntents(
             Observable.merge(
                 Observable.just(MonitoringIntents.StartMonitoringIntent),
-                Observable.just(MonitoringIntents.InitializeMonitoringIntent),
+                Observable.just(MonitoringIntents.InitializedMonitoringIntent),
                 Observable.just(alertReceivedIntent),
                 Observable.just(MonitoringIntents.CloseAlertMonitoringIntent(true))
             )
